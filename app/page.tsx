@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { createSwapy } from "swapy";
 
-const DEFAULT = {
+const DEFAULT: Record<string, "a" | "c" | "d" | null> = {
   "1": "a",
   "3": "c",
   "4": "d",
@@ -52,18 +52,31 @@ function getItemById(itemId: "a" | "c" | "d" | null) {
   }
 }
 
+function getItems() {
+  if (typeof window === "undefined") {
+    return DEFAULT;
+  }
+
+  return localStorage.getItem("slotItem")
+    ? JSON.parse(localStorage.getItem("slotItem")!)
+    : DEFAULT;
+}
+
 export default function Page() {
-  const slotItems: Record<string, "a" | "c" | "d" | null> =
-    localStorage.getItem("slotItem")
-      ? JSON.parse(localStorage.getItem("slotItem")!)
-      : DEFAULT;
+  const slotItems = getItems();
+
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     const container = document.querySelector(".container")!;
     const swapy = createSwapy(container);
     swapy.onSwap(({ data }) => {
       localStorage.setItem("slotItem", JSON.stringify(data.object));
     });
   }, []);
+
   return (
     <>
       <div className="container">
